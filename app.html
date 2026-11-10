@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Army Ability Injector — Tabletop Simulator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>&#9876;&#65039; Army Ability Injector</h1>
+    <p class="subtitle">
+      Loads an army definition, finds matching abilities in a Tabletop Simulator saved army file and injects the ability descriptions into each object's <code>Description</code> field.
+    </p>
+  </header>
+
+  <main class="app-main">
+    <!-- Step 1: files -->
+    <section class="card" id="files-card">
+      <h2><span class="step-badge">1</span> Load files</h2>
+      <div class="file-grid">
+        <label class="drop-zone" for="defFileInput">
+          <input type="file" id="defFileInput" accept=".json,application/json,text/plain" />
+          <div class="dz-icon">&#128465;&#65039;</div>
+          <span class="dz-title">Army definition (JSON)</span>
+          <span class="dz-hint">Battlescribe / roster export containing the ability definitions</span>
+        </label>
+
+        <label class="drop-zone" for="savedFileInput">
+          <input type="file" id="savedFileInput" accept=".json,application/json,text/plain" />
+          <div class="dz-icon">&#127903;</div>
+          <span class="dz-title">Saved army — Tabletop Simulator (JSON)</span>
+          <span class="dz-hint">The TTS save file whose Description fields will be updated</span>
+        </label>
+      </div>
+
+      <div class="load-status-row">
+        <div id="defStatus" class="status-pill status-empty">&#9432; definition not loaded yet</div>
+        <div id="savedStatus" class="status-pill status-empty">&#9432; saved army not loaded yet</div>
+      </div>
+
+      <details class="options">
+        <summary>Fuzzy matching options (used only when an exact name match fails)</summary>
+        <div class="option-row">
+          <label for="fuzzyThreshold">Similarity threshold: <span id="thresholdValue" class="mono">82%</span></label>
+          <input type="range" id="fuzzyThreshold" min="50" max="97" value="82" step="1" />
+        </div>
+      </details>
+    </section>
+
+    <!-- Step 2: proposals -->
+    <section class="card hidden" id="results-card">
+      <h2><span class="step-badge">2</span> Matched abilities — select what to inject</h2>
+      <div class="toolbar">
+        <button type="button" id="selectAllBtn" class="btn btn-ghost">&#9745; Select all</button>
+        <button type="button" id="deselectAllBtn" class="btn btn-ghost">&#9744; Deselect all</button>
+        <span id="matchSummary" class="mono summary"></span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="proposals-table">
+          <thead>
+            <tr>
+              <th class="col-check"><input type="checkbox" disabled title="" /></th>
+              <th>Object (TTS)</th>
+              <th>Ability</th>
+              <th>Matched as in file</th>
+              <th>Description to inject</th>
+            </tr>
+          </thead>
+          <tbody id="proposalsBody"></tbody>
+        </table>
+      </div>
+
+      <p class="empty-note hidden" id="noMatchesNote">No abilities matched. Try lowering the fuzzy threshold or check that both files belong to the same army.</p>
+    </section>
+
+    <!-- Abilities overview — bulk enable/disable + editable descriptions -->
+    <section class="card hidden" id="abilitiesCard">
+      <h2>&#128203; All abilities from the roster</h2>
+      <p class="hint small">
+        Use <b>Enable / Disable</b> to check or uncheck that ability on every matched unit at once.
+        Edit a description in place — the edited text is what gets injected when you click <b>Process</b>. (Leave it empty to skip injecting that ability.)
+      </p>
+      <div id="abilitiesList" class="abilities-list"></div>
+    </section>
+
+    <!-- Step 3: process -->
+    <section class="card hidden" id="process-card">
+      <h2><span class="step-badge">3</span> Process &amp; save</h2>
+      <div class="toolbar">
+        <button type="button" id="processBtn" class="btn btn-primary">&#9881;&#65039; Process — inject descriptions &amp; download file</button>
+        <span id="statusMessage" class="mono status-message"></span>
+      </div>
+    </section>
+
+    <!-- Preview -->
+    <section class="card hidden" id="preview-card">
+      <h2>&#128065; Result preview (Description fields after processing)</h2>
+      <p class="hint small">Only the checked abilities were applied. Newlines inside a Description are stored as <code>\n</code>, exactly like in the original file.</p>
+      <div id="previewList" class="preview-list"></div>
+    </section>
+
+    <footer class="app-footer">
+      Everything runs locally in your browser — no data is uploaded anywhere. Only the <code>Description</code>/<code>description</code> fields of matched objects are modified; all other content stays untouched.
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
