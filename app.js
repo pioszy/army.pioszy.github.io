@@ -189,11 +189,16 @@ function injectAfter(text, targetName, desc) {
     const endIdx = Math.min(idx + targetName.length, text.length);
     return text.slice(0, idx)
       + NAME_DEC_OPEN + text.slice(idx, endIdx) + NAME_DEC_CLOSE
-      + '\n' + DESC_DEC_OPEN + desc + DESC_DEC_CLOSE
+      + '\n' + DESC_DEC_OPEN + convertBoldMarkers(desc) + DESC_DEC_CLOSE
       + text.slice(endIdx);
   }
 
   return null; // not found — caller must skip this proposal
+}
+
+function convertBoldMarkers(descText) {
+  let toggle = false; // first (odd) occurrence opens, second closes...
+  return String(descText).replace(/\*\*/g, () => { const r = toggle ? '[/b]' : '[b]'; toggle = !toggle; return r; });
 }
 
 /* ===================================================================== *
